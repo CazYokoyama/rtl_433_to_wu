@@ -89,7 +89,7 @@ class WeatherD(Daemon.Daemon):
 
 	def run(self):
 		logger.info("Starting weatherd")
-		proc = subprocess.Popen(['/usr/local/bin/rtl_433','-M','newmodel','-F','json','-C','customary'], stdout=subprocess.PIPE)
+		proc = subprocess.Popen(['/usr/local/bin/rtl_433','-f','915M','-R','166','-M','newmodel','-F','json','-C','customary'], stdout=subprocess.PIPE)
 
 		msgid_re = re.compile('(\d*-\d*-\d* \d*:\d*:\d*) Acurite 5n1 sensor (0x.{0,4}) Ch ([ABC]), Msg (\d\d)')
 		msg38_re = re.compile('.*Msg 38, Wind (\d+\.?\d*) kmph \/ (\d+\.?\d*) mph, ([\+\-]?\d+\.?\d*) C ([\+\-]?\d+\.?\d*) F (\d+\.?\d*) % RH')
@@ -169,6 +169,20 @@ class WeatherD(Daemon.Daemon):
 				logger.debug("Weather updated")
 				weather.reset()
 				cur_rain = Decimal(0.0)
+
+			if msg['model']=='LaCrosse-BreezePro':
+				logger.debug("%s", msg['model'])
+				weather.timestamp = 'now'
+				weather.wind_mph = float(msg['wind_avg_mi_h'])
+				weather.temp_f = float(msg['temperature_F'])
+				weather.rh_pct = float(msg['humidity'])
+				weather.winddir_deg = float(msg['wind_dir_deg'])
+
+				logger.info("%s Wind %1.1f mph, dir %03.1f deg, %1.3f F, RH %1.1f%%", weather.timestamp, weather.wind_mph, weather.winddir_deg, weather.temp_f, weather.rh_pct)
+				logger.debug("Updating weather")
+				update_wu(weather)
+				logger.debug("Weather updated")
+				weather.reset()
 
 if __name__ == "__main__":
         daemon = WeatherD('/tmp/weatherd.pid')
