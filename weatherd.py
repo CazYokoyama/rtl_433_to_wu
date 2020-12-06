@@ -17,19 +17,16 @@ import json
 
 from decimal import Decimal
 
-config = ConfigParser.ConfigParser()
-config.read('/etc/weather.ini')
-
 logger = logging.getLogger("weatherd")
 logging.basicConfig(filename = '/var/log/weatherd.log', level=logging.INFO)
 
+parser = argparse.ArgumentParser(description='Weatherunderground updater')
+parser.add_argument('--config', '-c', default='/etc/weather.ini', help='specify config file')
+parser.add_argument('action', choices=['start', 'stop', 'restart'])
+args = parser.parse_args()
 
-#parser = argparse.ArgumentParser(description='Weatherunderground updater')
-#parser.add_argument('--id','-i', dest='id', help='station id/username')
-#parser.add_argument('--password','-p',dest='pw', help='weatherunderground password')
-#parser.add_argument('--test','-t',action='store_true',dest='testonly',help='dry run, only print GET string')
-#args = parser.parse_args()
-
+config = ConfigParser.ConfigParser()
+config.read(vars(args)['config'])
 
 wu_uri = 'http://rtupdate.wunderground.com/weatherstation/updateweatherstation.php'
 
@@ -186,17 +183,13 @@ class WeatherD(Daemon.Daemon):
 
 if __name__ == "__main__":
         daemon = WeatherD('/tmp/weatherd.pid')
-        if len(sys.argv) == 2:
-                if 'start' == sys.argv[1]:
-                        daemon.start()
-                elif 'stop' == sys.argv[1]:
-                        daemon.stop()
-                elif 'restart' == sys.argv[1]:
-                        daemon.restart()
-                else:
-                        print "Unknown command"
-                        sys.exit(2)
-                sys.exit(0)
-        else:
-                print "usage: %s start|stop|restart" % sys.argv[0]
-                sys.exit(2)
+	action = vars(args)['action']
+	if action == 'start':
+		daemon.start()
+	elif action == 'stop':
+		daemon.stop()
+	elif action == 'restart':
+		daemon.restart()
+	else:
+		print "Unknown command"
+		sys.exit(2)
