@@ -1,4 +1,5 @@
 [station]
+process = /usr/local/bin/rtl_433 -M newmodel -F json -C customary
 id=YOUR_STATION_ID_ALL_CAPS
 pw=yourpassword
 test=False

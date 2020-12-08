@@ -86,7 +86,15 @@ class WeatherD(Daemon.Daemon):
 
 	def run(self):
 		logger.info("Starting weatherd")
-		proc = subprocess.Popen(['/usr/local/bin/rtl_433','-f','915M','-R','166','-M','newmodel','-F','json','-C','customary'], stdout=subprocess.PIPE)
+
+		try:
+			invocation_string = config.get('station', 'process')
+			logger.info(invocation_string)
+		except ConfigParser.NoSectionError:
+			logger.error("Missing config section")
+		except Exception as e:
+			logger.error(e.strerror)
+		proc = subprocess.Popen(invocation_string, shell=True, stdout=subprocess.PIPE)
 
 		msgid_re = re.compile('(\d*-\d*-\d* \d*:\d*:\d*) Acurite 5n1 sensor (0x.{0,4}) Ch ([ABC]), Msg (\d\d)')
 		msg38_re = re.compile('.*Msg 38, Wind (\d+\.?\d*) kmph \/ (\d+\.?\d*) mph, ([\+\-]?\d+\.?\d*) C ([\+\-]?\d+\.?\d*) F (\d+\.?\d*) % RH')
