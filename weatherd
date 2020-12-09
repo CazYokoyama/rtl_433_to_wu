@@ -1,3 +1,13 @@
 #!/bin/bash
 
-python /home/pi/wu/weatherd.py $*
+### BEGIN INIT INFO
+# Provides:          weatherd
+# Required-Start:    $all
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: upload climate data to wunderground.com
+#
+### END INIT INFO
+
+python /home/pi/rtl_433_to_wu/weatherd.py $*
