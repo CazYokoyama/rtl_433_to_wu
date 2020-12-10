@@ -1,0 +1,3 @@
+[submodule "swpi"]
+	path = swpi
+	url = git@github.com:ToninoTarsi/swpi.git

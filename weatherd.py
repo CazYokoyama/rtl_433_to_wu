@@ -50,22 +50,34 @@ class Sensor:
 def update_wu(readings):
 	logger.debug("update_wu [in]")
 	try:
-		params = urllib.urlencode({
-			'action':'updateraw',
-			'ID':config.get('station','id'),
-			'PASSWORD':config.get('station','pw'),
-			'dateutc':readings.timestamp,
-			'winddir':readings.winddir_deg,
-			'windspeedmph':readings.wind_mph,
-			'humidity':readings.rh_pct,
-			'tempf':readings.temp_f,
-			'rainin':readings.rain_in, #rain in last hour
-			'dailyrainin':readings.rain_daily_in, #rain in last day
-			#'baromin':29.92,
-			#dewpt eq from http://andrew.rsmas.miami.edu/bmcnoldy/Humidity.html
-			'dewptf':243.04*(math.log(readings.rh_pct/100)+((17.625*readings.temp_f)/(243.04+readings.temp_f)))/(17.625-math.log(readings.rh_pct/100)-((17.625*readings.temp_f)/(243.04+readings.temp_f))),
+		if readings.rh_pct == None or readings.temp_f == None:
+			params = urllib.urlencode({
+				'action':'updateraw',
+				'ID':config.get('station','id'),
+				'PASSWORD':config.get('station','pw'),
+				'dateutc':readings.timestamp,
+				'winddir':readings.winddir_deg,
+				'windspeedmph':readings.wind_mph,
+				'rainin':readings.rain_in, #rain in last hour
+				'dailyrainin':readings.rain_daily_in, #rain in last day
 			'softwaretype':'rtl_433_to_wu'})
-	
+		else:
+			params = urllib.urlencode({
+				'action':'updateraw',
+				'ID':config.get('station','id'),
+				'PASSWORD':config.get('station','pw'),
+				'dateutc':readings.timestamp,
+				'winddir':readings.winddir_deg,
+				'windspeedmph':readings.wind_mph,
+				'humidity':readings.rh_pct,
+				'tempf':readings.temp_f,
+				'rainin':readings.rain_in, #rain in last hour
+				'dailyrainin':readings.rain_daily_in, #rain in last day
+				#'baromin':29.92,
+				#dewpt eq from http://andrew.rsmas.miami.edu/bmcnoldy/Humidity.html
+				'dewptf':243.04*(math.log(readings.rh_pct/100)+((17.625*readings.temp_f)/(243.04+readings.temp_f)))/(17.625-math.log(readings.rh_pct/100)-((17.625*readings.temp_f)/(243.04+readings.temp_f))),
+				'softwaretype':'rtl_433_to_wu'})
+
 		logger.debug(params)
 		if (not config.has_option('station','test') or config.getboolean('station', 'test') == False):
 			try:
@@ -188,6 +200,18 @@ class WeatherD(Daemon.Daemon):
 				update_wu(weather)
 				logger.debug("Weather updated")
 				weather.reset()
+
+			if msg['model'] == 'TX23U':
+				logger.debug("%s", msg['model'])
+				weather.timestamp = msg['time']
+				weather.wind_mph = float(msg['wind_avg_mi_h'])
+				weather.winddir_deg = float(msg['wind_dir_deg'])
+				logger.info("%s Wind %1.1f mph, dir %03.1f deg", weather.timestamp, weather.wind_mph, weather.winddir_deg)
+				logger.debug("Updating weather")
+				update_wu(weather)
+				logger.debug("Weather updated")
+				weather.reset()
+
 
 if __name__ == "__main__":
         daemon = WeatherD('/tmp/weatherd.pid')

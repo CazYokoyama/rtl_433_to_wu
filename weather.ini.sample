@@ -1,4 +1,9 @@
 [station]
+# TX23U
+# process = /usr/local/bin/rtl_433 -M newmodel -F json -C customary
+# LaCrosse-BreezePro
+# process = /usr/local/bin/rtl_433 -f 915M -R 166 -M newmodel -F json -C customary
+# Acurite-5n1
 process = /usr/local/bin/rtl_433 -M newmodel -F json -C customary
 id=YOUR_STATION_ID_ALL_CAPS
 pw=yourpassword
