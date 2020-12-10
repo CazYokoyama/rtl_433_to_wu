@@ -75,7 +75,8 @@ def update_wu(readings):
 				'dailyrainin':readings.rain_daily_in, #rain in last day
 				#'baromin':29.92,
 				#dewpt eq from http://andrew.rsmas.miami.edu/bmcnoldy/Humidity.html
-				'dewptf':243.04*(math.log(readings.rh_pct/100)+((17.625*readings.temp_f)/(243.04+readings.temp_f)))/(17.625-math.log(readings.rh_pct/100)-((17.625*readings.temp_f)/(243.04+readings.temp_f))),
+				'dewptf':243.04*(math.log(readings.rh_pct/100)+((17.625*readings.temp_f)/(243.04+readings.temp_f)))/skysight
+				(17.625-math.log(readings.rh_pct/100)-((17.625*readings.temp_f)/(243.04+readings.temp_f))),
 				'softwaretype':'rtl_433_to_wu'})
 
 		logger.debug(params)
@@ -152,7 +153,8 @@ class WeatherD(Daemon.Daemon):
 						
 					#handle hourly rain
 					if (cur_hour != datetime.datetime.today().hour):
-						logger.info("%s Resetting hourly rain total, was %1.1f", weather.timestamp, rain_hour)
+						logger.info("%s Resetting hourly rain total, was %1.1f",
+							    weather.timestamp, rain_hour)
 						cur_hour = datetime.datetime.today().hour
 						rain_hour = Decimal(0.0)
 			    
@@ -161,7 +163,8 @@ class WeatherD(Daemon.Daemon):
 				
 					#handle daily rain
 					if (cur_day != datetime.datetime.today().day):
-						logger.info("%s Resetting daily rain total, was %1.1f",  weather.timestamp, rain_day)
+						logger.info("%s Resetting daily rain total, was %1.1f",
+							    weather.timestamp, rain_day)
 						cur_day = datetime.datetime.today().day
 						rain_day = Decimal(0.0)
 				
@@ -178,7 +181,11 @@ class WeatherD(Daemon.Daemon):
 						logger.info("%s Got total rain of %1.3f in", datetime.datetime.now(), rain_total)
 
 			if (got_msg38 and got_msg31):
-				logger.info("%s Wind %1.1f mph, dir %03.1f deg, %1.3f F, RH %1.1f%%, Rain (last) %1.2f in, (1hr) %1.2f in, (1day) %1.2f in", weather.timestamp, weather.wind_mph, weather.winddir_deg, weather.temp_f, weather.rh_pct, cur_rain, weather.rain_in, weather.rain_daily_in)
+				logger.info("%s Wind %1.1f mph, dir %03.1f deg, %1.3f F, RH %1.1f%%, Rain (last) %1.2f in, (1hr) %1.2f in, (1day) %1.2f in",
+					    weather.timestamp,
+					    weather.wind_mph, weather.winddir_deg,
+					    weather.temp_f, weather.rh_pct,
+					    cur_rain, weather.rain_in, weather.rain_daily_in)
 				got_msg31=False
 				got_msg38=False
 				logger.debug("Updating weather")
@@ -195,7 +202,10 @@ class WeatherD(Daemon.Daemon):
 				weather.rh_pct = float(msg['humidity'])
 				weather.winddir_deg = float(msg['wind_dir_deg'])
 
-				logger.info("%s Wind %1.1f mph, dir %03.1f deg, %1.3f F, RH %1.1f%%", weather.timestamp, weather.wind_mph, weather.winddir_deg, weather.temp_f, weather.rh_pct)
+				logger.info("%s Wind %1.1f mph, dir %03.1f deg, %1.3f F, RH %1.1f%%",
+					    weather.timestamp,
+					    weather.wind_mph, weather.winddir_deg,
+					    weather.temp_f, weather.rh_pct)
 				logger.debug("Updating weather")
 				update_wu(weather)
 				logger.debug("Weather updated")
@@ -206,7 +216,9 @@ class WeatherD(Daemon.Daemon):
 				weather.timestamp = msg['time']
 				weather.wind_mph = float(msg['wind_avg_mi_h'])
 				weather.winddir_deg = float(msg['wind_dir_deg'])
-				logger.info("%s Wind %1.1f mph, dir %03.1f deg", weather.timestamp, weather.wind_mph, weather.winddir_deg)
+				logger.info("%s Wind %1.1f mph, dir %03.1f deg",
+					    weather.timestamp,
+					    weather.wind_mph, weather.winddir_deg)
 				logger.debug("Updating weather")
 				update_wu(weather)
 				logger.debug("Weather updated")
